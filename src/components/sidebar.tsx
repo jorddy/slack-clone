@@ -1,6 +1,19 @@
-import { MdCreate, MdFiberManualRecord } from "react-icons/md";
+import type { IconType } from "react-icons";
+import {
+  MdCreate,
+  MdFiberManualRecord,
+  MdInsertComment,
+  MdInbox,
+  MdDrafts,
+  MdBookmarkBorder,
+  MdFileCopy,
+  MdPeopleAlt,
+  MdApps,
+  MdExpandLess,
+  MdExpandMore
+} from "react-icons/md";
 
-const SidebarOption = () => {
+const SidebarOption = ({}: { Icon: IconType; title: string }) => {
   return <li>Sidebar option 1</li>;
 };
 
@@ -18,7 +31,14 @@ export default function Sidebar() {
       </div>
 
       <ul>
-        <SidebarOption />
+        <SidebarOption Icon={MdInsertComment} title='Threads' />
+        <SidebarOption Icon={MdInbox} title='Mentions & reactions' />
+        <SidebarOption Icon={MdDrafts} title='Saved items' />
+        <SidebarOption Icon={MdBookmarkBorder} title='Channel browser' />
+        <SidebarOption Icon={MdPeopleAlt} title='People & user groups' />
+        <SidebarOption Icon={MdApps} title='Apps' />
+        <SidebarOption Icon={MdFileCopy} title='File browser' />
+        <SidebarOption Icon={MdExpandLess} title='Show less' />
       </ul>
     </aside>
   );
