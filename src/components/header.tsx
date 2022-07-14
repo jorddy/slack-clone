@@ -3,7 +3,7 @@ import { MdAccessTime, MdHelpOutline, MdSearch } from "react-icons/md";
 
 export default function Header() {
   return (
-    <header className='fixed w-full px-6 py-4 grid grid-cols-8 gap-4 bg-slack text-white'>
+    <header className='px-6 py-4 grid grid-cols-8 gap-4 bg-slack text-white'>
       <div className='col-span-2 flex gap-2 items-center'>
         <div className='relative h-10 w-10 cursor-pointer hover:opacity-80'>
           <Image
