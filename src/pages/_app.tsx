@@ -4,10 +4,10 @@ import Header from "@/components/header";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <>
+    <div className='overflow-hidden'>
       <Header />
       <Component {...pageProps} />
-    </>
+    </div>
   );
 }
 
