@@ -1,4 +1,5 @@
 import { setupTRPC } from "@trpc/next";
+import { inferProcedureOutput } from "@trpc/server";
 import { AppRouter } from "@/server/router";
 import superjson from "superjson";
 
@@ -14,3 +15,7 @@ export const trpc = setupTRPC<AppRouter>({
   },
   ssr: true
 });
+
+export type InferQueryOutput<
+  TRouteKey extends keyof AppRouter["_def"]["queries"]
+> = inferProcedureOutput<AppRouter["_def"]["queries"][TRouteKey]>;
