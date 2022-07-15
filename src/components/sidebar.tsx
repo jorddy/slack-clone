@@ -10,14 +10,65 @@ import {
   MdPeopleAlt,
   MdApps,
   MdExpandLess,
-  MdExpandMore
+  MdExpandMore,
+  MdAdd
 } from "react-icons/md";
+import { trpc } from "@/utils/trpc";
+import { useRouter } from "next/router";
 
-const SidebarOption = ({}: { Icon: IconType; title: string }) => {
-  return <li>Sidebar option 1</li>;
+const SidebarOption = ({
+  Icon,
+  title,
+  id,
+  addChannel
+}: {
+  Icon?: IconType;
+  title: string;
+  id?: string;
+  addChannel?: boolean;
+}) => {
+  const { push } = useRouter();
+  const { mutate: createChannel } = trpc.proxy.channel.create.useMutation();
+
+  const handleChannel = () => {
+    if (addChannel) {
+      const name = window.prompt("Enter a channel name");
+
+      if (name) {
+        createChannel({ name });
+      }
+    }
+
+    if (!addChannel) {
+      if (id) {
+        push(`/room/${id}`);
+      }
+    }
+  };
+
+  return (
+    <li
+      onClick={handleChannel}
+      className='flex p-3 gap-2 items-center cursor-pointer hover:opacity-90 hover:bg-slack-accent'
+    >
+      {Icon && (
+        <>
+          <Icon className='h-6 w-6' />
+          <h3>{title}</h3>
+        </>
+      )}
+      {!Icon && (
+        <>
+          <span>#</span> {title}
+        </>
+      )}
+    </li>
+  );
 };
 
 export default function Sidebar() {
+  const { data: channels } = trpc.proxy.channel.getAll.useQuery();
+
   return (
     <aside className='col-span-1 bg-slack text-white'>
       <div className='flex p-4 items-center gap-2 border-t border-b border-gray-400'>
@@ -39,6 +90,20 @@ export default function Sidebar() {
         <SidebarOption Icon={MdApps} title='Apps' />
         <SidebarOption Icon={MdFileCopy} title='File browser' />
         <SidebarOption Icon={MdExpandLess} title='Show less' />
+
+        <hr className='border border-gray-400' />
+        <SidebarOption Icon={MdExpandMore} title='Channels' />
+        <hr className='border border-gray-400' />
+
+        <SidebarOption Icon={MdAdd} title='Add channel' addChannel />
+
+        {channels?.map(channel => (
+          <SidebarOption
+            key={channel.id}
+            id={channel.id}
+            title={channel.name}
+          />
+        ))}
       </ul>
     </aside>
   );

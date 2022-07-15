@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
+import { trpc } from "@/utils/trpc";
 import Header from "@/components/header";
 import Sidebar from "@/components/sidebar";
 
@@ -15,4 +16,4 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 }
 
-export default MyApp;
+export default trpc.withTRPC(MyApp);
