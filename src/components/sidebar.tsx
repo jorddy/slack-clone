@@ -28,7 +28,11 @@ const SidebarOption = ({
   addChannel?: boolean;
 }) => {
   const { push } = useRouter();
-  const { mutate: createChannel } = trpc.proxy.channel.create.useMutation();
+  const ctx = trpc.useContext();
+
+  const { mutate: createChannel } = trpc.proxy.channel.create.useMutation({
+    onSuccess: () => ctx.invalidateQueries(["channel.getAll"])
+  });
 
   const handleChannel = () => {
     if (addChannel) {
@@ -67,7 +71,7 @@ const SidebarOption = ({
 };
 
 export default function Sidebar() {
-  const { data: channels } = trpc.proxy.channel.getAll.useQuery();
+  const { data: channels, isRefetching } = trpc.proxy.channel.getAll.useQuery();
 
   return (
     <aside className='col-span-1 bg-slack text-white'>
@@ -104,6 +108,8 @@ export default function Sidebar() {
             title={channel.name}
           />
         ))}
+
+        {isRefetching && <p>Refreshing...</p>}
       </ul>
     </aside>
   );

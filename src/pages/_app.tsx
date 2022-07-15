@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { trpc } from "@/utils/trpc";
+import { ReactQueryDevtools } from "react-query/devtools";
 import Header from "@/components/header";
 import Sidebar from "@/components/sidebar";
 
@@ -12,6 +13,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <Sidebar />
         <Component {...pageProps} />
       </main>
+      <ReactQueryDevtools />
     </div>
   );
 }
