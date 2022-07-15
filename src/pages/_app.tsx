@@ -9,7 +9,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <div className='h-screen overflow-hidden'>
       <Header />
-      <main className='grid grid-cols-5 min-h-full'>
+      <main className='grid grid-cols-5 h-full'>
         <Sidebar />
         <Component {...pageProps} />
       </main>

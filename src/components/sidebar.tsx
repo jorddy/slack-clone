@@ -74,7 +74,7 @@ export default function Sidebar() {
   const { data: channels, isRefetching } = trpc.proxy.channel.getAll.useQuery();
 
   return (
-    <aside className='col-span-1 bg-slack text-white'>
+    <aside className='col-span-1 bg-slack text-white overflow-y-auto'>
       <div className='flex p-4 items-center gap-2 border-t border-b border-gray-400'>
         <div className='flex-1'>
           <h2 className='text-sm font-black pb-1'>SLACK HQ</h2>
@@ -85,7 +85,7 @@ export default function Sidebar() {
         <MdCreate className='h-8 w-8 p-1 bg-white text-slack rounded-full' />
       </div>
 
-      <ul>
+      <ul className='pb-8'>
         <SidebarOption Icon={MdInsertComment} title='Threads' />
         <SidebarOption Icon={MdInbox} title='Mentions & reactions' />
         <SidebarOption Icon={MdDrafts} title='Saved items' />
