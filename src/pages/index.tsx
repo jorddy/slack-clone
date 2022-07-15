@@ -1,7 +1,7 @@
 import AppLayout from "@/components/app-layout";
-import { GetServerSideProps } from "next";
-import { unstable_getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]";
+import { authorize } from "@/utils/authorize";
+
+export { authorize as getServerSideProps };
 
 export default function Index() {
   return (
@@ -12,18 +12,3 @@ export default function Index() {
     </AppLayout>
   );
 }
-
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const session = await unstable_getServerSession(req, res, authOptions);
-
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false
-      }
-    };
-  }
-
-  return { props: { session } };
-};

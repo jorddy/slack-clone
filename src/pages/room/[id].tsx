@@ -5,6 +5,9 @@ import { type InferQueryOutput, trpc } from "@/utils/trpc";
 import { type FormEvent, type RefObject, useRef } from "react";
 import { MdOutlineInfo, MdOutlineStarBorder } from "react-icons/md";
 import { useScrollBottom } from "@/utils/scroll-bottom";
+import { authorize } from "@/utils/authorize";
+
+export { authorize as getServerSideProps };
 
 const ChatInput = ({
   channelId,

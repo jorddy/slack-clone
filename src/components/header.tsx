@@ -1,22 +1,26 @@
 import Image from "next/image";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { MdAccessTime, MdHelpOutline, MdSearch } from "react-icons/md";
 
 export default function Header() {
+  const { data: session } = useSession();
+
   return (
     <header className='fixed w-full z-10 px-6 py-3 grid grid-cols-8 gap-4 bg-slack text-white'>
       <div className='col-span-2 flex gap-2 items-center'>
-        <div
-          onClick={() => signOut()}
-          className='relative h-10 w-10 cursor-pointer hover:opacity-80'
-        >
-          <Image
-            src='/placeholder.png'
-            alt='Profile picture'
-            layout='fill'
-            className='object-fill rounded-full'
-          />
-        </div>
+        {session?.user.image && session?.user.name && (
+          <button
+            onClick={() => signOut({ redirect: true, callbackUrl: "/" })}
+            className='relative h-10 w-10 cursor-pointer hover:opacity-80'
+          >
+            <Image
+              src={session.user.image}
+              alt={session.user.name}
+              layout='fill'
+              className='object-fill rounded-full'
+            />
+          </button>
+        )}
         <MdAccessTime className='h-6 w-6 ml-auto' />
       </div>
 
