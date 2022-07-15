@@ -1,11 +1,32 @@
+import { trpc } from "@/utils/trpc";
 import { useRouter } from "next/router";
 import type { FormEvent } from "react";
 import { MdOutlineInfo, MdOutlineStarBorder } from "react-icons/md";
 
 const ChatInput = ({ channelId }: { channelId: string }) => {
+  const ctx = trpc.useContext();
+
+  const { mutate: createMessage } = trpc.proxy.message.create.useMutation({
+    onMutate: async newMessage => {
+      await ctx.cancelQuery(["message.getByChannel"]);
+      // Optimistically update to the new value
+      ctx.setQueryData(["message.getByChannel"], oldMessages => {
+        if (oldMessages) {
+          return [...oldMessages, newMessage] as any;
+        }
+      });
+    },
+    onSuccess: () => ctx.invalidateQueries(["message.getByChannel"])
+  });
+
   const sendMessage = (e: FormEvent) => {
     e.preventDefault();
-    const form = new FormData(e.target as HTMLFormElement);
+
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+
+    createMessage({ message: formData.get("message") as string, channelId });
+    form.reset();
   };
 
   return (
@@ -28,6 +49,10 @@ export default function RoomPage() {
     return null;
   }
 
+  const { data: messages } = trpc.proxy.message.getByChannel.useQuery({
+    id: query.id
+  });
+
   return (
     <section className='col-span-4 overflow-y-auto'>
       <div className='flex p-5 justify-between items-center border-b'>
@@ -43,7 +68,13 @@ export default function RoomPage() {
         </p>
       </div>
 
-      <div>{/* TODO: List out messages */}</div>
+      <div>
+        {messages?.map(message => (
+          <p key={message.id}>
+            {message.createdAt.toLocaleDateString()} - {message.text}
+          </p>
+        ))}
+      </div>
 
       <ChatInput channelId={query.id} />
     </section>
