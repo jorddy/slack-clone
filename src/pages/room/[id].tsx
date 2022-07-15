@@ -1,10 +1,15 @@
 import { trpc } from "@/utils/trpc";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import type { FormEvent } from "react";
 import { MdOutlineInfo, MdOutlineStarBorder } from "react-icons/md";
 
 const ChatInput = ({ channelId }: { channelId: string }) => {
   const ctx = trpc.useContext();
+
+  const { data: channel } = trpc.proxy.channel.getById.useQuery({
+    id: channelId
+  });
 
   const { mutate: createMessage } = trpc.proxy.message.create.useMutation({
     onMutate: async newMessage => {
@@ -34,7 +39,7 @@ const ChatInput = ({ channelId }: { channelId: string }) => {
       <input
         type='text'
         name='message'
-        placeholder={`Message #${channelId}`}
+        placeholder={`Message #${channel?.name}`}
         className='fixed bottom-7 p-5 w-3/4 border border-gray-500 rounded-sm'
       />
       <button type='submit' hidden></button>
@@ -49,16 +54,32 @@ export default function RoomPage() {
     return null;
   }
 
-  const { data: messages } = trpc.proxy.message.getByChannel.useQuery({
-    id: query.id
-  });
+  const { data: channel, isLoading: loadingChannel } =
+    trpc.proxy.channel.getById.useQuery({
+      id: query.id
+    });
+
+  const { data: messages, isLoading: loadingMessages } =
+    trpc.proxy.message.getByChannel.useQuery({
+      id: query.id
+    });
+
+  if (loadingChannel || loadingMessages) {
+    return (
+      <section className='col-span-4 grid place-content-center h-full'>
+        <div className='relative h-10 w-10'>
+          <Image src='/spinner.svg' alt='loading spinner' layout='fill' />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className='col-span-4 overflow-y-auto'>
       <div className='flex p-5 justify-between items-center border-b'>
         <div className='flex gap-2 items-center'>
           <h4 className='lowercase'>
-            <strong>#Room-name</strong>
+            <strong>#{channel?.name}</strong>
           </h4>
           <MdOutlineStarBorder className='h-6 w-6' />
         </div>

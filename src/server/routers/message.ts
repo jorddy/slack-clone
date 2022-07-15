@@ -11,7 +11,8 @@ export const messageRouter = t.router({
     )
     .query(({ input, ctx }) =>
       ctx.prisma.message.findMany({
-        where: { channelId: input.id }
+        where: { channelId: input.id },
+        orderBy: { createdAt: "asc" }
       })
     ),
   create: authProcedure
