@@ -6,16 +6,20 @@ import { type FormEvent, type RefObject, useRef } from "react";
 import { MdOutlineInfo, MdOutlineStarBorder } from "react-icons/md";
 import { useScrollBottom } from "@/utils/scroll-bottom";
 import { authorize } from "@/utils/authorize";
+import { useSession } from "next-auth/react";
 
 export { authorize as getServerSideProps };
 
 const ChatInput = ({
   channelId,
-  chatBottomRef
+  chatBottomRef,
+  messages
 }: {
   channelId: string;
   chatBottomRef: RefObject<HTMLDivElement | null>;
+  messages: InferQueryOutput<"message.getByChannel">;
 }) => {
+  const { data: session } = useSession();
   const ctx = trpc.useContext();
 
   const { data: channel } = trpc.proxy.channel.getById.useQuery({
@@ -24,15 +28,21 @@ const ChatInput = ({
 
   const { mutate: createMessage } = trpc.proxy.message.create.useMutation({
     onMutate: async newMessage => {
-      await ctx.cancelQuery(["message.getByChannel"]);
-      // Optimistically update to the new value
-      ctx.setQueryData(["message.getByChannel"], oldMessages => {
-        if (oldMessages) {
-          return [...oldMessages, newMessage] as any;
+      await ctx.cancelQuery(["message.getByChannel", { id: channelId }]);
+      ctx.setQueryData(["message.getByChannel", { id: channelId }], [
+        ...messages,
+        {
+          text: newMessage.message,
+          createdAt: new Date(),
+          user: {
+            image: session?.user.image,
+            name: session?.user.name
+          }
         }
-      });
+      ] as any);
     },
-    onSuccess: () => ctx.invalidateQueries(["message.getByChannel"])
+    onSuccess: () =>
+      ctx.invalidateQueries(["message.getByChannel", { id: channelId }])
   });
 
   const sendMessage = (e: FormEvent) => {
@@ -41,7 +51,10 @@ const ChatInput = ({
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
 
-    createMessage({ message: formData.get("message") as string, channelId });
+    createMessage({
+      message: formData.get("message") as string,
+      channelId
+    });
 
     chatBottomRef?.current?.scrollIntoView({ behavior: "smooth" });
     form.reset();
@@ -100,17 +113,26 @@ export default function RoomPage() {
   }
 
   const { data: channel, isLoading: loadingChannel } =
-    trpc.proxy.channel.getById.useQuery({
-      id: query.id
-    });
+    trpc.proxy.channel.getById.useQuery(
+      {
+        id: query.id
+      },
+      {
+        enabled: !!query.id
+      }
+    );
 
   const { data: messages, isLoading: loadingMessages } =
-    trpc.proxy.message.getByChannel.useQuery({
-      id: query.id
-    });
+    trpc.proxy.message.getByChannel.useQuery(
+      {
+        id: query.id as string
+      },
+      {
+        enabled: !!query.id
+      }
+    );
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useScrollBottom(chatBottomRef, query.id, loadingMessages);
+  useScrollBottom(chatBottomRef, query.id as string, loadingMessages);
 
   if (loadingChannel || loadingMessages) {
     return (
@@ -140,15 +162,23 @@ export default function RoomPage() {
           </p>
         </div>
 
-        <div>
-          {messages?.length === 0 && <p className='p-4'>No messages !</p>}
-          {messages?.map(message => (
-            <Message key={message.id} message={message} />
-          ))}
-          <div ref={chatBottomRef} className='pb-28'></div>
-        </div>
+        {messages && (
+          <>
+            <div>
+              {messages?.length === 0 && <p className='p-4'>No messages !</p>}
+              {messages?.map(message => (
+                <Message key={message.id} message={message} />
+              ))}
+              <div ref={chatBottomRef} className='pb-28'></div>
+            </div>
 
-        <ChatInput channelId={query.id} chatBottomRef={chatBottomRef} />
+            <ChatInput
+              channelId={query.id}
+              chatBottomRef={chatBottomRef}
+              messages={messages}
+            />
+          </>
+        )}
       </section>
     </AppLayout>
   );
