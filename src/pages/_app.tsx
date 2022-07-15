@@ -4,8 +4,6 @@ import { trpc } from "@/utils/trpc";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { SessionProvider } from "next-auth/react";
 import Head from "next/head";
-import Header from "@/components/header";
-import Sidebar from "@/components/sidebar";
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
@@ -14,11 +12,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
         <Head>
           <title>Slack 2.0 Clone</title>
         </Head>
-        <Header />
-        <main className='grid grid-cols-5 h-full'>
-          <Sidebar />
-          <Component {...pageProps} />
-        </main>
+        <Component {...pageProps} />
         <ReactQueryDevtools />
       </div>
     </SessionProvider>

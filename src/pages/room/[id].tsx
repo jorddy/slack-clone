@@ -1,4 +1,5 @@
 import Image from "next/image";
+import AppLayout from "@/components/app-layout";
 import { useRouter } from "next/router";
 import { type InferQueryOutput, trpc } from "@/utils/trpc";
 import { type FormEvent, type RefObject, useRef } from "react";
@@ -106,41 +107,46 @@ export default function RoomPage() {
     });
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  // useScrollBottom(chatBottomRef, query.id, loadingMessages);
+  useScrollBottom(chatBottomRef, query.id, loadingMessages);
 
   if (loadingChannel || loadingMessages) {
     return (
-      <section className='mt-16 col-span-4 grid place-content-center h-full'>
-        <div className='relative h-10 w-10'>
-          <Image src='/spinner.svg' alt='loading spinner' layout='fill' />
-        </div>
-      </section>
+      <AppLayout>
+        <section className='mt-16 col-span-4 grid place-content-center h-full'>
+          <div className='relative h-10 w-10'>
+            <Image src='/spinner.svg' alt='loading spinner' layout='fill' />
+          </div>
+        </section>
+      </AppLayout>
     );
   }
 
   return (
-    <section className='mt-16 col-span-4 overflow-y-auto'>
-      <div className='flex p-5 justify-between items-center border-b'>
-        <div className='flex gap-2 items-center'>
-          <h4 className='lowercase'>
-            <strong>#{channel?.name}</strong>
-          </h4>
-          <MdOutlineStarBorder className='h-6 w-6' />
+    <AppLayout>
+      <section className='mt-16 col-span-4 overflow-y-auto'>
+        <div className='flex p-5 justify-between items-center border-b'>
+          <div className='flex gap-2 items-center'>
+            <h4 className='lowercase'>
+              <strong>#{channel?.name}</strong>
+            </h4>
+            <MdOutlineStarBorder className='h-6 w-6' />
+          </div>
+
+          <p className='flex gap-2 items-center'>
+            <MdOutlineInfo className='h-6 w-6' /> Details
+          </p>
         </div>
 
-        <p className='flex gap-2 items-center'>
-          <MdOutlineInfo className='h-6 w-6' /> Details
-        </p>
-      </div>
+        <div>
+          {messages?.length === 0 && <p className='p-4'>No messages !</p>}
+          {messages?.map(message => (
+            <Message key={message.id} message={message} />
+          ))}
+          <div ref={chatBottomRef} className='pb-28'></div>
+        </div>
 
-      <div>
-        {messages?.map(message => (
-          <Message key={message.id} message={message} />
-        ))}
-        <div ref={chatBottomRef} className='pb-44'></div>
-      </div>
-
-      <ChatInput channelId={query.id} chatBottomRef={chatBottomRef} />
-    </section>
+        <ChatInput channelId={query.id} chatBottomRef={chatBottomRef} />
+      </section>
+    </AppLayout>
   );
 }
