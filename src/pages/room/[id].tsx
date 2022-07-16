@@ -108,14 +108,10 @@ export default function RoomPage() {
   const { query } = useRouter();
   const chatBottomRef = useRef<HTMLDivElement | null>(null);
 
-  if (!query.id || typeof query.id !== "string") {
-    return null;
-  }
-
   const { data: channel, isLoading: loadingChannel } =
     trpc.proxy.channel.getById.useQuery(
       {
-        id: query.id
+        id: query.id as string
       },
       {
         enabled: !!query.id
@@ -133,6 +129,10 @@ export default function RoomPage() {
     );
 
   useScrollBottom(chatBottomRef, query.id as string, loadingMessages);
+
+  if (!query.id || typeof query.id !== "string") {
+    return null;
+  }
 
   if (loadingChannel || loadingMessages) {
     return (
@@ -162,23 +162,19 @@ export default function RoomPage() {
           </p>
         </div>
 
-        {messages && (
-          <>
-            <div>
-              {messages?.length === 0 && <p className='p-4'>No messages !</p>}
-              {messages?.map(message => (
-                <Message key={message.id} message={message} />
-              ))}
-              <div ref={chatBottomRef} className='pb-28'></div>
-            </div>
+        <div>
+          {messages?.length === 0 && <p className='p-4'>No messages !</p>}
+          {messages?.map(message => (
+            <Message key={message.id} message={message} />
+          ))}
+          <div ref={chatBottomRef} className='pb-48'></div>
+        </div>
 
-            <ChatInput
-              channelId={query.id}
-              chatBottomRef={chatBottomRef}
-              messages={messages}
-            />
-          </>
-        )}
+        <ChatInput
+          channelId={query.id}
+          chatBottomRef={chatBottomRef}
+          messages={messages!}
+        />
       </section>
     </AppLayout>
   );
